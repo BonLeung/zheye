@@ -7,6 +7,10 @@ import ColumnDetail from './views/ColumnDetail.vue'
 const routerHistory = createWebHistory()
 const router = createRouter({
   history: routerHistory,
+  scrollBehavior(to, from, savedPosition) {
+    // 始终滚动到顶部
+    return { top: 0 }
+  },
   routes: [
     {
       path: '/',
