@@ -52,8 +52,8 @@ export default defineComponent({
     const passwordRules: RulesProp = [
       { type: 'required', message: '密码不能为空' }
     ]
-    const emailVal = ref('123@qq.com')
-    const passwordVal = ref('123')
+    const emailVal = ref('BonLeung@test.com')
+    const passwordVal = ref('111111')
 
     const onFormSubmit = (result: boolean) => {
       if (result) {

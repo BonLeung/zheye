@@ -1,27 +1,39 @@
 import axios from 'axios'
 import { Commit, createStore } from 'vuex'
-export interface UserProps {
-  isLogin: boolean;
-  nickName?: string;
-  email?: string;
-  _id?: string;
-  column?: string;
+
+export interface ResponseType<P> {
+  code: number;
+  msg: string;
+  data: P;
 }
 
 export interface ImageProps {
   _id?: string;
   url?: string;
+  fitUrl?: string;
   createAt?: string;
 }
 
+export interface UserProps {
+  isLogin: boolean;
+  nickName?: string;
+  _id?: string;
+  column?: string;
+  email?: string;
+  avatar?: ImageProps;
+  description?: string;
+}
+
 export interface PostProps {
-  _id: string;
+  _id?: string;
   title: string;
   excerpt?: string;
   content?: string;
-  image?: ImageProps;
-  createdAt: string;
-  column: string;
+  image?: ImageProps | string;
+  createdAt?: string;
+  column?: string;
+  author?: string | UserProps;
+  isHTML?: boolean;
 }
 
 export interface ColumnProps {
@@ -78,6 +90,12 @@ const store = createStore<GlobalDataProps>({
     fetchPosts(state, rawData) {
       state.posts = rawData.data.list
     },
+    fetchPost(state, rawData) {
+      state.posts.push(rawData.data)
+    },
+    createPost(state, rawData) {
+      console.log(rawData)
+    },
     setLoading(state, status) {
       state.loading = status
     },
@@ -92,6 +110,11 @@ const store = createStore<GlobalDataProps>({
       state.token = token
       axios.defaults.headers.common.Authorization = `Bearer ${token}`
       localStorage.setItem('token', token)
+    },
+    logout(state) {
+      state.token = ''
+      localStorage.removeItem('token')
+      delete axios.defaults.headers.common.Authorization
     }
   },
   getters: {
@@ -100,6 +123,9 @@ const store = createStore<GlobalDataProps>({
     },
     getPostsById: (state) => (cid: string) => {
       return state.posts.filter(post => post.column === cid)
+    },
+    getCurrentPost: (state) => (id: string) => {
+      return state.posts.find(item => item._id === id)
     }
   },
   actions: {
@@ -111,6 +137,12 @@ const store = createStore<GlobalDataProps>({
     },
     fetchPosts({ commit }, cid) {
       getAndCommit(`/api/columns/${cid}/posts`, 'fetchPosts', commit)
+    },
+    fetchPost({ commit }, id) {
+      return getAndCommit(`/api/posts/${id}`, 'fetchPost', commit)
+    },
+    createPost({ commit }, payload) {
+      return postAndCommit('/api/posts', 'createPost', commit, payload)
     },
     fetchCurrentUser({ commit }) {
       return getAndCommit('/api/user/current', 'fetchCurrentUser', commit)
